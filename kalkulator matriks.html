@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kalkulator Matriks Lengkap dengan Warna</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fefefe;
+      padding: 20px;
+      color: #333;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1, h2 {
+      margin-bottom: 10px;
+    }
+
+    label {
+      margin-right: 15px;
+    }
+
+    input[type=number] {
+      width: 60px;
+      padding: 5px;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    button {
+      padding: 8px 14px;
+      margin: 5px 3px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin: 10px 0;
+    }
+    td {
+      padding: 3px;
+    }
+
+    input[readonly] {
+      background-color: #eee;
+      border: none;
+      color: #555;
+      font-weight: bold;
+    }
+
+    #result {
+      margin-top: 25px;
+    }
+
+    /* Warna Dinamis */
+    .matrix-input input[type=number] {
+      border: 2px solid var(--border-color, #007bff);
+      background-color: var(--input-bg, #fff);
+      color: var(--input-color, #000);
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>Kalkulator Matriks Dinamis dengan Pilihan Warna</h1>
+
+  <div>
+    <label>Baris: <input type="number" id="rows" value="2" min="1" /></label>
+    <label>Kolom: <input type="number" id="cols" value="2" min="1" /></label>
+    <button onclick="generateMatrixInputs()">Buat Matriks</button>
+  </div>
+
+  <div style="margin-top: 10px;">
+    <label>Pilih warna input: 
+      <input type="color" id="colorBorder" value="#007bff" onchange="updateColors()" title="Warna border input" />
+    </label>
+    <label>Pilih warna background input:
+      <input type="color" id="colorBg" value="#ffffff" onchange="updateColors()" title="Warna background input" />
+    </label>
+    <label>Pilih warna teks input:
+      <input type="color" id="colorText" value="#000000" onchange="updateColors()" title="Warna teks input" />
+    </label>
+  </div>
+
+  <div id="matrices" class="matrix-input"></div>
+
+  <div style="margin-top: 15px;">
+    <button onclick="calculate('add')">Penjumlahan</button>
+    <button onclick="calculate('subtract')">Pengurangan</button>
+    <button onclick="calculate('multiply')">Perkalian</button>
+    <button onclick="calculate('divide')">Pembagian</button>
+    <button onclick="transpose('A')">Transpose A</button>
+    <button onclick="transpose('B')">Transpose B</button>
+  </div>
+
+  <div id="result"></div>
+
+  <script>
+    // Update CSS variables untuk warna input
+    function updateColors() {
+      const border = document.getElementById('colorBorder').value;
+      const bg = document.getElementById('colorBg').value;
+      const text = document.getElementById('colorText').value;
+
+      document.documentElement.style.setProperty('--border-color', border);
+      document.documentElement.style.setProperty('--input-bg', bg);
+      document.documentElement.style.setProperty('--input-color', text);
+    }
+
+    // Generate input matriks sesuai ukuran
+    function generateMatrixInputs() {
+      const rows = parseInt(document.getElementById('rows').value);
+      const cols = parseInt(document.getElementById('cols').value);
+      const container = document.getElementById('matrices');
+      container.innerHTML = '';
+
+      container.innerHTML += '<h2>Matriks A</h2>' + buildMatrix('a', rows, cols);
+      container.innerHTML += '<h2>Matriks B</h2>' + buildMatrix('b', rows, cols);
+      document.getElementById('result').innerHTML = '';
+    }
+
+    // Membuat tabel matriks input
+    function buildMatrix(prefix, rows, cols) {
+      let html = '<table>';
+      for (let i = 0; i < rows; i++) {
+        html += '<tr>';
+        for (let j = 0; j < cols; j++) {
+          html += `<td><input type="number" id="${prefix}_${i}_${j}" value="0" step="any" /></td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</table>';
+      return html;
+    }
+
+    // Ambil data matriks dari input
+    function getMatrix(prefix, rows, cols) {
+      const matrix = [];
+      for (let i = 0; i < rows; i++) {
+        const row = [];
+        for (let j = 0; j < cols; j++) {
+          const val = parseFloat(document.getElementById(`${prefix}_${i}_${j}`).value);
+          row.push(isNaN(val) ? 0 : val);
+        }
+        matrix.push(row);
+      }
+      return matrix;
+    }
+
+    // Hitung operasi matriks
+    function calculate(operation) {
+      const rows = parseInt(document.getElementById('rows').value);
+      const cols = parseInt(document.getElementById('cols').value);
+
+      const A = getMatrix('a', rows, cols);
+      const B = getMatrix('b', rows, cols);
+
+      let result;
+
+      try {
+        if (operation === 'add') {
+          result = A.map((row, i) => row.map((val, j) => val + B[i][j]));
+          showResult(result, 'Penjumlahan A + B');
+        }
+        else if (operation === 'subtract') {
+          result = A.map((row, i) => row.map((val, j) => val - B[i][j]));
+          showResult(result, 'Pengurangan A - B');
+        }
+        else if (operation === 'divide') {
+          result = A.map((row, i) => row.map((val, j) => {
+            if (B[i][j] === 0) throw new Error("Pembagian dengan nol tidak diperbolehkan");
+            return val / B[i][j];
+          }));
+          showResult(result, 'Pembagian A ÷ B (elemen per elemen)');
+        }
+        else if (operation === 'multiply') {
+          if (A[0].length !== B.length) throw new Error("Kolom A harus sama dengan baris B untuk perkalian");
+
+          result = Array.from({ length: A.length }, () => Array(B[0].length).fill(0));
+          for (let i = 0; i < A.length; i++) {
+            for (let j = 0; j < B[0].length; j++) {
+              for (let k = 0; k < A[0].length; k++) {
+                result[i][j] += A[i][k] * B[k][j];
+              }
+            }
+          }
+          showResult(result, 'Perkalian A × B');
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Transpose matriks A atau B
+    function transpose(matrixName) {
+      const rows = parseInt(document.getElementById('rows').value);
+      const cols = parseInt(document.getElementById('cols').value);
+
+      const M = getMatrix(matrixName.toLowerCase(), rows, cols);
+      const transposed = M[0].map((_, i) => M.map(row => row[i]));
+
+      showResult(transposed, `Transpose Matriks ${matrixName}`);
+    }
+
+    // Tampilkan hasil dalam tabel dengan input readonly
+    function showResult(matrix, title) {
+      let html = `<h2>${title}</h2><table>`;
+      for (let i = 0; i < matrix.length; i++) {
+        html += '<tr>';
+        for (let j = 0; j < matrix[i].length; j++) {
+          html += `<td><input type="number" value="${matrix[i][j].toFixed(2)}" readonly /></td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</table>';
+      document.getElementById('result').innerHTML = html;
+    }
+
+    // Init warna default di CSS variables
+    updateColors();
+  </script>
+</body>
+</html>
