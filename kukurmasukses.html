@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kalkulator Matriks Fleksibel</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f8ff;
+    padding: 20px;
+    color: #222;
+  }
+  h1 {
+    text-align: center;
+    color: #005f73;
+  }
+  .container {
+    max-width: 900px;
+    margin: 20px auto;
+    background: #e0fbfc;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,95,115,0.2);
+  }
+  .input-row {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+  label {
+    font-weight: 600;
+    color: #0a9396;
+  }
+  input[type=number] {
+    width: 70px;
+    padding: 8px;
+    border: 2px solid #94d2bd;
+    border-radius: 8px;
+    font-size: 1em;
+  }
+  button, select {
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: #005f73;
+    color: white;
+    font-weight: 700;
+    font-size: 1em;
+    transition: background-color 0.3s;
+  }
+  button:hover, select:hover {
+    background: #0a9396;
+  }
+  .matrix-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+    gap: 30px;
+  }
+  .matrix-box {
+    background: #94d2bd;
+    padding: 15px 20px;
+    border-radius: 15px;
+    box-shadow: 0 3px 7px rgba(0,0,0,0.15);
+    min-width: 280px;
+  }
+  .matrix-box h3 {
+    margin-top: 0;
+    color: #001219;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  table {
+    margin: auto;
+    border-collapse: collapse;
+  }
+  td {
+    padding: 5px;
+  }
+  input.matrix-input {
+    width: 60px;
+    padding: 7px;
+    font-size: 1em;
+    border-radius: 6px;
+    border: 1.8px solid #0a9396;
+    text-align: center;
+  }
+  #result {
+    background: #ee9b00;
+    padding: 20px;
+    border-radius: 15px;
+    color: #001219;
+    font-weight: 700;
+    font-size: 1.1em;
+    min-height: 60px;
+    max-width: 650px;
+    margin: 0 auto;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+  }
+  #result table {
+    margin: 10px auto;
+    background: #94d2bd;
+    border-radius: 12px;
+    box-shadow: inset 0 0 10px #001219;
+  }
+  #result td {
+    padding: 10px 15px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Kalkulator Matriks Fleksibel</h1>
+
+  <div class="input-row">
+    <label for="rows">Jumlah Baris:</label>
+    <input type="number" id="rows" min="1" max="10" value="2" />
+    <label for="cols">Jumlah Kolom:</label>
+    <input type="number" id="cols" min="1" max="10" value="2" />
+    <button onclick="generateMatrices()">Buat Matriks</button>
+  </div>
+
+  <div class="matrix-container">
+    <div class="matrix-box">
+      <h3>Matriks A</h3>
+      <table id="matrixA"></table>
+    </div>
+    <div class="matrix-box">
+      <h3>Matriks B</h3>
+      <table id="matrixB"></table>
+    </div>
+  </div>
+
+  <div class="input-row" style="justify-content:center;">
+    <select id="operation" style="min-width: 230px;">
+      <option value="add">Penjumlahan (A + B)</option>
+      <option value="subtract">Pengurangan (A - B)</option>
+      <option value="multiply">Perkalian (A × B)</option>
+      <option value="divide">Pembagian elemen (A ÷ B)</option>
+      <option value="transposeA">Transpos Matriks A</option>
+      <option value="transposeB">Transpos Matriks B</option>
+      <option value="detA">Determinan Matriks A (Persegi)</option>
+      <option value="detB">Determinan Matriks B (Persegi)</option>
+      <option value="invA">Invers Matriks A (Persegi)</option>
+      <option value="invB">Invers Matriks B (Persegi)</option>
+    </select>
+    <button onclick="calculate()">Hitung</button>
+  </div>
+
+  <div id="result"></div>
+</div>
+
+<script>
+// Buat matriks input sesuai jumlah baris dan kolom
+function generateMatrices() {
+  const rows = parseInt(document.getElementById("rows").value);
+  const cols = parseInt(document.getElementById("cols").value);
+
+  if(rows < 1 || cols < 1 || rows > 10 || cols > 10){
+    alert("Jumlah baris dan kolom harus antara 1 sampai 10");
+    return;
+  }
+
+  createMatrix("matrixA", rows, cols);
+  createMatrix("matrixB", rows, cols);
+
+  document.getElementById("result").innerHTML = "";
+}
+
+function createMatrix(tableId, rows, cols){
+  const table = document.getElementById(tableId);
+  table.innerHTML = "";
+
+  for(let i=0; i<rows; i++){
+    const tr = document.createElement("tr");
+    for(let j=0; j<cols; j++){
+      const td = document.createElement("td");
+      const input = document.createElement("input");
+      input.type = "number";
+      input.value = 0;
+      input.classList.add("matrix-input");
+      input.id = `${tableId}_${i}_${j}`;
+      td.appendChild(input);
+      tr.appendChild(td);
+    }
+    table.appendChild(tr);
+  }
+}
+
+// Ambil matriks dari input
+function getMatrix(tableId){
+  const table = document.getElementById(tableId);
+  const rows = table.rows.length;
+  if(rows === 0) return [];
+  const cols = table.rows[0].cells.length;
+  const matrix = [];
+
+  for(let i=0; i<rows; i++){
+    const row = [];
+    for(let j=0; j<cols; j++){
+      const val = parseFloat(document.getElementById(`${tableId}_${i}_${j}`).value);
+      row.push(isNaN(val) ? 0 : val);
+    }
+    matrix.push(row);
+  }
+  return matrix;
+}
+
+// Fungsi transpose matriks (untuk semua ukuran)
+function transpose(matrix){
+  if(matrix.length === 0) return [];
+  const rows = matrix.length;
+  const cols = matrix[0].length;
+  const transposed = [];
+  for(let c=0; c<cols; c++){
+    const newRow = [];
+    for(let r=0; r<rows; r++){
+      newRow.push(matrix[r][c]);
+    }
+    transposed.push(newRow);
+  }
+  return transposed;
+}
+
+// Determinan hanya untuk matriks persegi
+function determinant(matrix){
+  const n = matrix.length;
+  if(n === 0 || matrix[0].length !== n) return null;
+
+  if(n === 1) return matrix[0][0];
+  if(n === 2){
+    return matrix[0][0]*matrix[1][1] - matrix[0][1]*matrix[1][0];
+  }
+
+  let det = 0;
+  for(let c=0; c<n; c++){
+    const minor = matrix.slice(1).map(row => row.filter((_, j) => j !== c));
+    det += (c % 2 === 0 ? 1 : -1) * matrix[0][c] * determinant(minor);
+  }
+  return det;
+}
+
+// Invers matriks (untuk matriks persegi) menggunakan metode kofaktor & adjugate
+function inverse(matrix){
+  const det = determinant(matrix);
+  if(det === 0 || det === null) return null;
+  const n = matrix.length;
+
+  // Hitung matriks kofaktor
+  const cofactors = [];
+  for(let r=0; r<n; r++){
+    const cofactorRow = [];
+    for(let c=0; c<n; c++){
+      const minor = matrix
+        .filter((_, i) => i !== r)
+        .map(row => row.filter((_, j) => j !== c));
+      const cofactor = ((r + c) % 2 === 0 ? 1 : -1) * determinant(minor);
+      cofactorRow.push(cofactor);
+    }
+    cofactors.push(cofactorRow);
+  }
+
+  // Adjugate = transpose kofaktor
+  const adjugate = transpose(cofactors);
+
+  // Bagi adjugate dengan determinan
+  return adjugate.map(row => row.map(val => val / det));
+}
+
+// Operasi perkalian matriks (dimensi harus cocok)
+function multiplyMatrices(A, B){
+  const aRows = A.length, aCols = A[0]?.length || 0;
+  const bRows = B.length, bCols = B[0]?.length || 0;
+
+  if(aCols !== bRows) return null;
+
+  const result = [];
+  for(let i=0; i<aRows; i++){
+    const row = [];
+    for(let j=0; j<bCols; j++){
+      let sum = 0;
+      for(let k=0; k<aCols; k++){
+        sum += A[i][k] * B[k][j];
+      }
+      row.push(sum);
+    }
+    result.push(row);
+  }
+  return result;
+}
+
+// Penjumlahan, pengurangan, pembagian elemen harus matriks sama ukuran
+function elementWiseOp(A, B, op){
+  const rows = A.length;
+  if(rows === 0) return null;
+  const cols = A[0].length;
+
+  if(B.length !== rows || B[0].length !== cols) return null;
+
+  const result = [];
+  for(let i=0; i<rows; i++){
+    const row = [];
+    for(let j=0; j<cols; j++){
+      const aVal = A[i][j];
+      const bVal = B[i][j];
+      if(op === 'add') row.push(aVal + bVal);
+      else if(op === 'subtract') row.push(aVal - bVal);
+      else if(op === 'divide') {
+        if(bVal === 0) return null;
+        row.push(aVal / bVal);
+      }
+    }
+    result.push(row);
+  }
+  return result;
+}
+
+// Tampilkan matriks di elemen result
+function displayMatrix(matrix){
+  if(matrix.length === 0) return "<i>Matriks kosong</i>";
+
+  let html = "<table>";
+  for(const row of matrix){
+    html += "<tr>";
+    for(const val of row){
+      html += `<td>${val.toFixed(3)}</td>`;
+    }
+    html += "</tr>";
+  }
+  html += "</table>";
+  return html;
+}
+
+// Fungsi utama kalkulasi
+function calculate(){
+  const operation = document.getElementById("operation").value;
+  const A = getMatrix("matrixA");
+  const B = getMatrix("matrixB");
+  const resultDiv = document.getElementById("result");
+
+  if(A.length === 0){
+    resultDiv.innerHTML = "<span style='color:red;'>Matriks A belum dibuat!</span>";
+    return;
+  }
+
+  let res;
+
+  switch(operation){
+    case "add":
+      res = elementWiseOp(A,B,"add");
+      if(res === null) resultDiv.innerHTML = "<span style='color:red;'>Penjumlahan gagal: ukuran matriks harus sama.</span>";
+      else resultDiv.innerHTML = "<b>Hasil Penjumlahan (A + B):</b><br>" + displayMatrix(res);
+      break;
+
+    case "subtract":
+      res = elementWiseOp(A,B,"subtract");
+      if(res === null) resultDiv.innerHTML = "<span style='color:red;'>Pengurangan gagal: ukuran matriks harus sama.</span>";
+      else resultDiv.innerHTML = "<b>Hasil Pengurangan (A - B):</b><br>" + displayMatrix(res);
+      break;
+
+    case "divide":
+      res = elementWiseOp(A,B,"divide");
+      if(res === null) resultDiv.innerHTML = "<span style='color:red;'>Pembagian gagal: ukuran harus sama dan elemen B tidak boleh nol.</span>";
+      else resultDiv.innerHTML = "<b>Hasil Pembagian Elemen (A ÷ B):</b><br>" + displayMatrix(res);
+      break;
+
+    case "multiply":
+      res = multiplyMatrices(A,B);
+      if(res === null) resultDiv.innerHTML = "<span style='color:red;'>Perkalian gagal: kolom A harus sama dengan baris B.</span>";
+      else resultDiv.innerHTML = "<b>Hasil Perkalian (A × B):</b><br>" + displayMatrix(res);
+      break;
+
+    case "transposeA":
+      res = transpose(A);
+      resultDiv.innerHTML = "<b>Hasil Transpos Matriks A:</b><br>" + displayMatrix(res);
+      break;
+
+    case "transposeB":
+      res = transpose(B);
+      resultDiv.innerHTML = "<b>Hasil Transpos Matriks B:</b><br>" + displayMatrix(res);
+      break;
+
+    case "detA":
+      if(A.length !== A[0].length){
+        resultDiv.innerHTML = "<span style='color:red;'>Determinan hanya untuk matriks persegi A!</span>";
+        break;
+      }
+      res = determinant(A);
+      resultDiv.innerHTML = `<b>Determinan Matriks A:</b> ${res.toFixed(3)}`;
+      break;
+
+    case "detB":
+      if(B.length !== B[0].length){
+        resultDiv.innerHTML = "<span style='color:red;'>Determinan hanya untuk matriks persegi B!</span>";
+        break;
+      }
+      res = determinant(B);
+      resultDiv.innerHTML = `<b>Determinan Matriks B:</b> ${res.toFixed(3)}`;
+      break;
+
+    case "invA":
+      if(A.length !== A[0].length){
+        resultDiv.innerHTML = "<span style='color:red;'>Invers hanya untuk matriks persegi A!</span>";
+        break;
+      }
+      res = inverse(A);
+      if(res === null){
+        resultDiv.innerHTML = "<span style='color:red;'>Matriks A tidak memiliki invers (determinan 0)!</span>";
+      } else {
+        resultDiv.innerHTML = "<b>Hasil Invers Matriks A:</b><br>" + displayMatrix(res);
+      }
+     
