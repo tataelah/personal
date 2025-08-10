@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kalkulator Matriks Bebas Ukuran</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f7f9fc;
+    color: #374151;
+    margin: 20px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+  }
+  .container {
+    background: white;
+    width: 95vw;
+    max-width: 1200px;
+    padding: 25px 30px;
+    border-radius: 18px;
+    box-shadow: 0 12px 24px rgba(99, 115, 129, 0.15);
+  }
+  h1 {
+    text-align: center;
+    color: #334155;
+    margin-bottom: 25px;
+    font-weight: 700;
+  }
+  label {
+    display: inline-block;
+    margin-top: 15px;
+    font-weight: 600;
+    font-size: 15px;
+    color: #475569;
+  }
+  input[type=number] {
+    width: 70px;
+    padding: 10px 14px;
+    font-size: 17px;
+    border-radius: 12px;
+    border: 1.5px solid #cbd5e1;
+    margin-left: 10px;
+    transition: border-color 0.3s;
+  }
+  input[type=number]:focus {
+    outline: none;
+    border-color: #7c3aed;
+    background: #f3e8ff;
+  }
+  button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 16px 0;
+    background: #a78bfa;
+    border: none;
+    border-radius: 15px;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    user-select: none;
+  }
+  button:hover:not(:disabled) {
+    background: #7c3aed;
+  }
+  button:disabled {
+    background: #d8b4fe;
+    cursor: not-allowed;
+  }
+  .matrix-wrapper {
+    display: flex;
+    gap: 25px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .matrix-box {
+    background: #f3f4f6;
+    border-radius: 20px;
+    padding: 20px;
+    flex: 1 1 450px;
+    max-height: 480px;
+    overflow: auto;
+    box-shadow: inset 0 0 12px #ddd6fe;
+  }
+  .matrix-box h3 {
+    font-weight: 700;
+    color: #5b21b6;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .grid {
+    display: grid;
+    justify-content: center;
+    gap: 8px;
+  }
+  .grid input {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 14px;
+    border: 1.8px solid #c4b5fd;
+    background: white;
+    transition: border-color 0.3s;
+  }
+  .grid input:focus {
+    outline: none;
+    border-color: #7c3aed;
+    background: #ede9fe;
+  }
+  select {
+    margin-top: 25px;
+    width: 100%;
+    padding: 13px 16px;
+    font-size: 17px;
+    border-radius: 15px;
+    border: 1.8px solid #c4b5fd;
+    background: white;
+    color: #5b21b6;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.3s;
+  }
+  select:focus {
+    outline: none;
+    border-color: #7c3aed;
+    background: #ede9fe;
+  }
+  #result {
+    margin-top: 35px;
+    background: #ede9fe;
+    border-radius: 18px;
+    padding: 25px 30px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+    min-height: 90px;
+    white-space: pre-wrap;
+    color: #4c1d95;
+    box-shadow: inset 0 0 16px #a78bfaaa;
+  }
+  @media (max-width: 960px) {
+    .matrix-box {
+      max-height: 350px;
+      flex: 1 1 100%;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Kalkulator Matriks Bebas Ukuran</h1>
+
+  <div>
+    <label>Baris Matriks A: <input id="rowsA" type="number" min="1" max="100" value="3" /></label>
+    <label>Kolom Matriks A: <input id="colsA" type="number" min="1" max="100" value="3" /></label>
+  </div>
+
+  <div>
+    <label>Baris Matriks B: <input id="rowsB" type="number" min="1" max="100" value="3" /></label>
+    <label>Kolom Matriks B: <input id="colsB" type="number" min="1" max="100" value="3" /></label>
+  </div>
+
+  <button id="generateBtn">Buat Matriks</button>
+
+  <div class="matrix-wrapper">
+    <div class="matrix-box">
+      <h3>Matriks A</h3>
+      <div id="matrixA" class="grid"></div>
+    </div>
+    <div class="matrix-box">
+      <h3>Matriks B</h3>
+      <div id="matrixB" class="grid"></div>
+    </div>
+  </div>
+
+  <select id="operation">
+    <option value="add">Penjumlahan (A + B)</option>
+    <option value="subtract">Pengurangan (A - B)</option>
+    <option value="multiply">Perkalian (A × B)</option>
+    <option value="transposeA">Transpos Matriks A</option>
+    <option value="transposeB">Transpos Matriks B</option>
+    <option value="determinantA">Determinan Matriks A (Persegi)</option>
+    <option value="determinantB">Determinan Matriks B (Persegi)</option>
+    <option value="inverseA">Invers Matriks A (Persegi)</option>
+    <option value="inverseB">Invers Matriks B (Persegi)</option>
+  </select>
+
+  <button id="calculateBtn">Hitung</button>
+
+  <pre id="result"></pre>
+</div>
+
+<script>
+  const generateBtn = document.getElementById('generateBtn');
+  const calculateBtn = document.getElementById('calculateBtn');
+  const matrixAContainer = document.getElementById('matrixA');
+  const matrixBContainer = document.getElementById('matrixB');
+  const resultContainer = document.getElementById('result');
+  const rowsAInput = document.getElementById('rowsA');
+  const colsAInput = document.getElementById('colsA');
+  const rowsBInput = document.getElementById('rowsB');
+  const colsBInput = document.getElementById('colsB');
+  const operationSelect = document.getElementById('operation');
+
+  function createMatrixGrid(container, rows, cols) {
+    container.innerHTML = '';
+    container.style.gridTemplateColumns = `repeat(${cols}, 50px)`;
+    for(let r=0; r<rows; r++) {
+      for(let c=0; c<cols; c++) {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.step = 'any';
+        input.placeholder = '0';
+        input.dataset.row = r;
+        input.dataset.col = c;
+        container.appendChild(input);
+      }
+    }
+  }
+
+  function getMatrix(container, rows, cols) {
+    const matrix = [];
+    for(let r=0; r<rows; r++) {
+      const row = [];
+      for(let c=0; c<cols; c++) {
+        const input = container.querySelector(`input[data-row="${r}"][data-col="${c}"]`);
+        if(!input) return null;
+        let val = input.value.trim();
+        if(val === '') val = '0';
+        const num = Number(val);
+        if(isNaN(num)) return null;
+        row.push(num);
+      }
+      matrix.push(row);
+    }
+    return matrix;
+  }
+
+  function formatMatrix(M) {
+    return M.map(row => row.map(x => x.toFixed(4)).join('\t')).join('\n');
+  }
+
+  // Operasi matriks
+  function addMatrices(A, B) {
+    return A.map((row,i) => row.map((v,j) => v + B[i][j]));
+  }
+  function subtractMatrices(A, B) {
+    return A.map((row,i) => row.map((v,j) => v - B[i][j]));
+  }
+  function multiplyMatrices(A, B) {
+    const res = [];
+    for(let i=0; i<A.length; i++) {
+      res[i] = [];
+      for(let j=0; j<B[0].length; j++) {
+        let sum = 0;
+        for(let k=0; k<B.length; k++) {
+          sum += A[i][k] * B[k][j];
+        }
+        res[i][j] = sum;
+      }
+    }
+    return res;
+  }
+  function transposeMatrix(M) {
+    const rows = M.length;
+    const cols = M[0].length;
+    const res = [];
+    for(let c=0; c<cols; c++) {
+      res[c] = [];
+      for(let r=0; r<rows; r++) {
+        res[c][r] = M[r][c];
+      }
+    }
+    return res;
+  }
+
+  // Determinan (rekursif, lambat untuk besar)
+  function determinant(M) {
+    const n = M.length;
+    if (n === 1) return M[0][0];
+    if (n === 2) return M[0][0]*M[1][1] - M[0][1]*M[1][0];
+    let det = 0;
+    for(let col=0; col<n; col++) {
+      det += ((col % 2 === 0) ? 1 : -1) * M[0][col] * determinant(minor(M,0,col));
+    }
+    return det;
+  }
+  function minor(M, row, col) {
+    const res = [];
+    for(let r=0; r<M.length; r++) {
+      if(r === row) continue;
+      const newRow = [];
+      for(let c=0; c<M.length; c++) {
+        if(c === col) continue;
+        newRow.push(M[r][c]);
+      }
+      res.push(newRow);
+    }
+    return res;
+  }
+
+  // Invers via adjoin/determinan
+  function inverseMatrix(M) {
+    const det = determinant(M);
+    if(det === 0) return null;
+    const n = M.length;
+    const adj = [];
+    for(let i=0; i<n; i++) {
+      adj[i] = [];
+      for(let j=0; j<n; j++)
