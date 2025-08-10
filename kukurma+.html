@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Kalkulator Matriks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f4f4f4;
+            color: #333;
+        }
+
+        input[type="number"] {
+            width: 60px;
+            margin: 5px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        #matrix-container {
+            display: flex;
+            gap: 50px;
+            margin-top: 20px;
+        }
+
+        #matrixA, #matrixB {
+            margin-top: 10px;
+        }
+
+        .operations {
+            margin: 20px 0;
+        }
+
+        h2 {
+            margin-top: 30px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+</head>
+<body>
+    <h1>Kalkulator Matriks</h1>
+
+    <label>Ukuran Matriks:</label>
+    <input type="number" id="rows" placeholder="Baris" min="1" value="2">
+    <input type="number" id="cols" placeholder="Kolom" min="1" value="2">
+    <button onclick="generateMatrices()">Buat Matriks</button>
+
+    <div id="matrix-container">
+        <div>
+            <h3>Matriks A</h3>
+            <div id="matrixA"></div>
+        </div>
+        <div>
+            <h3>Matriks B</h3>
+            <div id="matrixB"></div>
+        </div>
+    </div>
+
+    <div class="operations">
+        <button onclick="calculate('add')">A + B</button>
+        <button onclick="calculate('subtract')">A - B</button>
+        <button onclick="calculate('multiply')">A × B</button>
+        <button onclick="calculate('divide')">A × inv(B)</button>
+        <button onclick="calculate('transposeA')">Transpos A</button>
+        <button onclick="calculate('transposeB')">Transpos B</button>
+        <button onclick="calculate('inverseA')">Invers A</button>
+        <button onclick="calculate('inverseB')">Invers B</button>
+        <button onclick="calculate('detA')">Determinan A</button>
+        <button onclick="calculate('detB')">Determinan B</button>
+    </div>
+
+    <h2>Hasil:</h2>
+    <div id="result"></div>
+
+    <script>
+        function generateMatrices() {
+            const rows = parseInt(document.getElementById("rows").value);
+            const cols = parseInt(document.getElementById("cols").value);
+
+            const matrixA = document.getElementById("matrixA");
+            const matrixB = document.getElementById("matrixB");
+
+            matrixA.innerHTML = "";
+            matrixB.innerHTML = "";
+
+            for (let r = 0; r < rows; r++) {
+                const rowA = document.createElement("div");
+                const rowB = document.createElement("div");
+
+                for (let c = 0; c < cols; c++) {
+                    rowA.appendChild(createInput(`A-${r}-${c}`));
+                    rowB.appendChild(createInput(`B-${r}-${c}`));
+                }
+
+                matrixA.appendChild(rowA);
+                matrixB.appendChild(rowB);
+            }
+        }
+
+        function createInput(id) {
+            const input = document.createElement("input");
+            input.type = "number";
+            input.id = id;
+            input.style.width = "50px";
+            return input;
+        }
+
+        function getMatrix(name, rows, cols) {
+            const matrix = [];
+            for (let r = 0; r < rows; r++) {
+                const row = [];
+                for (let c = 0; c < cols; c++) {
+                    const val = parseFloat(document.getElementById(`${name}-${r}-${c}`).value) || 0;
+                    row.push(val);
+                }
+                matrix.push(row);
+            }
+            return math.matrix(matrix);
+        }
+
+        function displayResult(matrix) {
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "";
+
+            if (typeof matrix === "number") {
+                resultDiv.innerText = matrix;
+                return;
+            }
+
+            const arr = matrix._data || matrix;
+            arr.forEach(row => {
+                const rowDiv = document.createElement("div");
+                rowDiv.textContent = row.join("  ");
+                resultDiv.appendChild(rowDiv);
+            });
+        }
+
+        function calculate(operation) {
+            const rows = parseInt(document.getElementById("rows").value);
+            const cols = parseInt(document.getElementById("cols").value);
+
+            const A = getMatrix("A", rows, cols);
+            const B = getMatrix("B", rows, cols);
+
+            try {
+                let result;
+
+                switch (operation) {
+                    case "add":
+                        result = math.add(A, B);
+                        break;
+                    case "subtract":
+                        result = math.subtract(A, B);
+                        break;
+                    case "multiply":
+                        result = math.multiply(A, B);
+                        break;
+                    case "divide":
+                        result = math.multiply(A, math.inv(B));
+                        break;
+                    case "transposeA":
+                        result = math.transpose(A);
+                        break;
+                    case "transposeB":
+                        result = math.transpose(B);
+                        break;
+                    case "inverseA":
+                        result = math.inv(A);
+                        break;
+                    case "inverseB":
+                        result = math.inv(B);
+                        break;
+                    case "detA":
+                        result = math.det(A);
+                        break;
+                    case "detB":
+                        result = math.det(B);
+                        break;
+                    default:
+                        result = "Operasi tidak dikenal.";
+                }
+
+                displayResult(result);
+            } catch (error) {
+                document.getElementById("result").innerText = "Error: " + error.message;
+            }
+        }
+
+        // Buat matriks default saat halaman dimuat
+        window.onload = generateMatrices;
+    </script>
+</body>
+</html>
